@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f6cfd0; /* tom rosado */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  background: linear-gradient(to right, #0fada3, #473c97);
+  border-radius: 30px;
+  padding: 40px;
+  width: 300px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.login-container h2 {
+  color: #ffffff;
+  margin-bottom: 30px;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 25px;
+  background-color: #d6d6d6;
+  font-size: 14px;
+}
+
+.login-container button {
+  width: 100%;
+  padding: 12px;
+  background-color: #3aa7f5;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.login-container button:hover {
+  background-color: #2f91d1;
+}
