@@ -20,27 +20,31 @@
     </div>
     <p id="login-erro" style="color: yellow; font-size: 14px;"></p>
   </div>
-  <script>
-    const form = document.getElementById('login-form');
-    const erro = document.getElementById('login-erro');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const senha = document.getElementById('senha').value;
+<script>
+  const form = document.getElementById('login-form');
+  const erro = document.getElementById('login-erro');
 
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, senha })
-      });
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-      if (response.ok) {
-        window.location.href = 'https://lufarinna.github.io/acupuntura-web-client/';
-      } else {
-        erro.textContent = 'Usuário ou senha incorretos';
-      }
+    const username = document.getElementById('username').value;
+    const senha = document.getElementById('senha').value;
+
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, senha })
     });
-  </script>
+
+    if (response.ok) {
+      // Redireciona para a nova página desejada
+      window.location.href = 'https://lufarinna.github.io/acupuntura-web-client/';
+    } else {
+      erro.textContent = 'Usuário ou senha incorretos';
+    }
+  });
+</script>
+
 </body>
 </html>
