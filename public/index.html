@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,14 +10,37 @@
 <body>
   <div class="login-container">
     <h2>Login</h2>
-    <form>
-      <input type="text" placeholder="Username" required>
-      <input type="password" placeholder="Password" required>
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Username" required>
+      <input type="password" id="senha" placeholder="Password" required>
       <button type="submit">Login</button>
     </form>
     <div style="margin-top: 15px;">
       <a href="cadastro.html" style="color: white; text-decoration: underline;">Não tem conta? Cadastre-se</a>
     </div>
+    <p id="login-erro" style="color: yellow; font-size: 14px;"></p>
   </div>
+  <script>
+    const form = document.getElementById('login-form');
+    const erro = document.getElementById('login-erro');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const senha = document.getElementById('senha').value;
+
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, senha })
+      });
+
+      if (response.ok) {
+        window.location.href = 'https://lufarinna.github.io/acupuntura-web-client/';
+      } else {
+        erro.textContent = 'Usuário ou senha incorretos';
+      }
+    });
+  </script>
 </body>
 </html>

@@ -1,3 +1,4 @@
+<!-- cadastro.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,14 +10,55 @@
 <body>
   <div class="login-container">
     <h2>Cadastro</h2>
-    <form>
-      <input type="text" placeholder="Nome completo" required>
-      <input type="email" placeholder="E-mail" required>
-      <input type="text" placeholder="Nome de usuário" required>
-      <input type="password" placeholder="Senha" required>
-      <input type="password" placeholder="Confirmar senha" required>
+    <form id="cadastro-form">
+      <input type="text" id="nome" placeholder="Nome completo" required>
+      <input type="email" id="email" placeholder="E-mail" required>
+      <input type="text" id="username" placeholder="Nome de usuário" required>
+      <input type="password" id="senha" placeholder="Senha" required>
+      <input type="password" id="confirmar" placeholder="Confirmar senha" required>
       <button type="submit">Cadastrar</button>
     </form>
+    <div style="margin-top: 15px;">
+      <a href="index.html" style="color: white; text-decoration: underline;">Voltar ao login</a>
+    </div>
+    <p id="cadastro-erro" style="color: yellow; font-size: 14px;"></p>
+    <p id="cadastro-ok" style="color: #00ffae; font-size: 14px;"></p>
   </div>
+  <script>
+    const form = document.getElementById('cadastro-form');
+    const erro = document.getElementById('cadastro-erro');
+    const ok = document.getElementById('cadastro-ok');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      erro.textContent = '';
+      ok.textContent = '';
+
+      const nome = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const username = document.getElementById('username').value;
+      const senha = document.getElementById('senha').value;
+      const confirmar = document.getElementById('confirmar').value;
+
+      if (senha !== confirmar) {
+        erro.textContent = 'As senhas não coincidem';
+        return;
+      }
+
+      const response = await fetch('/cadastro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email, username, senha })
+      });
+
+      const resultado = await response.json();
+
+      if (response.status === 201) {
+        ok.textContent = resultado.message;
+      } else {
+        erro.textContent = resultado.message || 'Erro ao cadastrar';
+      }
+    });
+  </script>
 </body>
 </html>

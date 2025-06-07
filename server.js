@@ -1,10 +1,12 @@
+// server.js completo com senha criptografada
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const bcrypt = require('bcrypt');
 const app = express();
 
 // Middleware para servir arquivos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'))); 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -21,11 +23,23 @@ const Usuario = mongoose.model('Usuario', {
   senha: String
 });
 
-// Rota de cadastro
+// Rota de cadastro com bcrypt
 app.post('/cadastro', async (req, res) => {
   try {
-    const novo = new Usuario(req.body);
+    const { nome, email, username, senha } = req.body;
+
+    const usuarioExistente = await Usuario.findOne({
+      $or: [{ email }, { username }]
+    });
+
+    if (usuarioExistente) {
+      return res.status(400).json({ message: 'Usuário ou e-mail já cadastrado.' });
+    }
+
+    const senhaHash = await bcrypt.hash(senha, 10);
+    const novo = new Usuario({ nome, email, username, senha: senhaHash });
     await novo.save();
+
     res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
   } catch (err) {
     console.error('Erro ao cadastrar:', err);
@@ -33,13 +47,19 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
-// Rota de login aprimorada
+// Rota de login com verificação de hash
 app.post('/login', async (req, res) => {
   try {
     const { username, senha } = req.body;
-    const user = await Usuario.findOne({ username, senha });
+    const user = await Usuario.findOne({ username });
 
-    if (user) {
+    if (!user) {
+      return res.status(401).json({ message: 'Usuário ou senha inválidos' });
+    }
+
+    const senhaCorreta = await bcrypt.compare(senha, user.senha);
+
+    if (senhaCorreta) {
       res.status(200).json({ message: 'Login bem-sucedido' });
     } else {
       res.status(401).json({ message: 'Usuário ou senha inválidos' });
