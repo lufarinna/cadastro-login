@@ -47,7 +47,6 @@ app.post('/cadastro', async (req, res) => {
   }
 });
 
-// Rota de login com verificação de hash
 app.post('/login', async (req, res) => {
   try {
     const { username, senha } = req.body;
@@ -59,14 +58,21 @@ app.post('/login', async (req, res) => {
 
     const senhaCorreta = await bcrypt.compare(senha, user.senha);
 
-    if (senhaCorreta) {
-      res.status(200).json({ message: 'Login bem-sucedido' });
-    } else {
-      res.status(401).json({ message: 'Usuário ou senha inválidos' });
+    if (!senhaCorreta) {
+      return res.status(401).json({ message: 'Usuário ou senha inválidos' });
     }
+
+    res.status(200).json({ message: 'Login bem-sucedido' });
   } catch (err) {
     console.error('Erro no login:', err);
     res.status(500).json({ message: 'Erro interno do servidor' });
+  }
+
+  console.log("Dados recebidos:", req.body);
+  console.log("Usuário encontrado:", user);
+  if (user) {
+    const senhaCorreta = await bcrypt.compare(senha, user.senha);
+    console.log("Senha correta?", senhaCorreta);  
   }
 });
 
