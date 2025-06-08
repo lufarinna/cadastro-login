@@ -242,24 +242,30 @@
     camera.start();
 
     function desenharPonto(nome, ponto, cor) {
-      const x = ponto.x * canvas.width;
-      const y = ponto.y * canvas.height;
-      ctx.beginPath();
-      ctx.arc(x, y, 6, 0, 2 * Math.PI);
-      ctx.fillStyle = cor;
-      ctx.fill();
-      ctx.font = '12px Arial';
-      ctx.fillText(nome, x + 8, y);
-      pontosPlotados.push({ nome, x, y });
+    const x = canvas.width - (ponto.x * canvas.width); // espelha horizontalmente
+    const y = ponto.y * canvas.height;
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = cor;
+    ctx.fill();
+    ctx.font = '12px Arial';
+    ctx.fillText(nome, x + 8, y);
+    pontosPlotados.push({ nome, x, y });
     }
 
+
     function desenharLinha(p1, p2, cor) {
-      ctx.beginPath();
-      ctx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
-      ctx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
-      ctx.strokeStyle = cor;
-      ctx.lineWidth = 2;
-      ctx.stroke();
+    const x1 = canvas.width - (p1.x * canvas.width);
+    const y1 = p1.y * canvas.height;
+    const x2 = canvas.width - (p2.x * canvas.width);
+    const y2 = p2.y * canvas.height;
+
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = cor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
     }
 
     canvas.addEventListener('mousemove', e => {
