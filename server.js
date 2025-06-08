@@ -50,29 +50,26 @@ app.post('/cadastro', async (req, res) => {
 app.post('/login', async (req, res) => {
   try {
     const { username, senha } = req.body;
+    console.log("Dados recebidos:", req.body);
+
     const user = await Usuario.findOne({ username });
+    console.log("Usuário encontrado:", user);
 
     if (!user) {
       return res.status(401).json({ message: 'Usuário ou senha inválidos' });
     }
 
     const senhaCorreta = await bcrypt.compare(senha, user.senha);
+    console.log("Senha correta?", senhaCorreta);
 
     if (!senhaCorreta) {
       return res.status(401).json({ message: 'Usuário ou senha inválidos' });
     }
 
-    res.status(200).json({ message: 'Login bem-sucedido' });
+    return res.status(200).json({ message: 'Login bem-sucedido' });
   } catch (err) {
     console.error('Erro no login:', err);
     res.status(500).json({ message: 'Erro interno do servidor' });
-  }
-
-  console.log("Dados recebidos:", req.body);
-  console.log("Usuário encontrado:", user);
-  if (user) {
-    const senhaCorreta = await bcrypt.compare(senha, user.senha);
-    console.log("Senha correta?", senhaCorreta);  
   }
 });
 
