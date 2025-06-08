@@ -123,20 +123,67 @@
       <option value="SJ">SJ – Triplo Aquecedor</option>
     </select>
   </div>
-
   <div id="descricao-meridiano">
     <h3>Descrição do Meridiano</h3>
     <p>Selecione um meridiano acima para ver a descrição e os pontos associados.</p>
   </div>
-
   <div id="tooltip"></div>
+  <script>
+    const funcoes = {
+      'LU-11': 'Reanima consciência, alivia calor e garganta.',
+      'LU-10': 'Melhora tosse seca, garganta inflamada.',
+      'LU-9': 'Tonifica pulmão e circulação.',
+      'HT-9': 'Acalma mente, revigora coração.',
+      'HT-8': 'Reduz ansiedade e palpitações.',
+      'HT-7': 'Melhor ponto para insônia e estresse.',
+      'PC-9': 'Revive consciência, melhora calor no peito.',
+      'PC-8': 'Acalma mente, alivia calor interno.',
+      'PC-7': 'Melhora sono, acalma coração.',
+      'IG-1': 'Dores de dente, febre, garganta inflamada.',
+      'IG-2': 'Remove calor e inflamação.',
+      'IG-4': 'Dores em geral, ativa imunidade.',
+      'ID-1': 'Revive consciência, melhora audição.',
+      'ID-3': 'Dor cervical e torcicolo.',
+      'ID-5': 'Dor de cabeça e pescoço.',
+      'SJ-1': 'Dor no ouvido, garganta seca.',
+      'SJ-2': 'Dores no braço e ombro.',
+      'SJ-4': 'Alivia dor no punho e tensão.'
+    };
 
+    const descricoesMeridianos = {
+      'LU': { titulo: 'LU – Pulmão', descricao: 'Responsável pela respiração...', pontos: {'LU-11': funcoes['LU-11'],'LU-10': funcoes['LU-10'],'LU-9': funcoes['LU-9']} },
+      'HT': { titulo: 'HT – Coração', descricao: 'Governa a mente...', pontos: {'HT-9': funcoes['HT-9'],'HT-8': funcoes['HT-8'],'HT-7': funcoes['HT-7']} },
+      'PC': { titulo: 'PC – Pericárdio', descricao: 'Protege o coração...', pontos: {'PC-9': funcoes['PC-9'],'PC-8': funcoes['PC-8'],'PC-7': funcoes['PC-7']} },
+      'IG': { titulo: 'IG – Intestino Grosso', descricao: 'Elimina resíduos...', pontos: {'IG-1': funcoes['IG-1'],'IG-2': funcoes['IG-2'],'IG-4': funcoes['IG-4']} },
+      'ID': { titulo: 'ID – Intestino Delgado', descricao: 'Separa o puro do impuro...', pontos: {'ID-1': funcoes['ID-1'],'ID-3': funcoes['ID-3'],'ID-5': funcoes['ID-5']} },
+      'SJ': { titulo: 'SJ – Triplo Aquecedor', descricao: 'Coordena os três aquecedores...', pontos: {'SJ-1': funcoes['SJ-1'],'SJ-2': funcoes['SJ-2'],'SJ-4': funcoes['SJ-4']} }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const seletor = document.getElementById('meridiano');
+      const descDiv = document.getElementById('descricao-meridiano');
+
+      seletor.addEventListener('change', () => {
+        const val = seletor.value;
+        if (val === "TODOS") {
+          descDiv.innerHTML = `<h3>Descrição do Meridiano</h3><p>Selecione um meridiano acima para ver a descrição e os pontos associados.</p>`;
+        } else {
+          const mer = descricoesMeridianos[val];
+          let html = `<h3>${mer.titulo}</h3><p>${mer.descricao}</p><ul>`;
+          for (const pt in mer.pontos) {
+            html += `<li><strong>${pt}</strong>: ${mer.pontos[pt]}</li>`;
+          }
+          html += `</ul>`;
+          descDiv.innerHTML = html;
+        }
+      });
+    });
+  </script>
   <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const tooltip = document.getElementById('tooltip');
-    const seletor = document.getElementById('meridiano');
     let pontosPlotados = [];
 
     navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
@@ -165,6 +212,7 @@
       ctx.drawImage(results.image, -canvas.width, 0, canvas.width, canvas.height);
       ctx.restore();
       pontosPlotados = [];
+
       if (results.multiHandLandmarks) {
         for (const lm of results.multiHandLandmarks) {
           const meridianos = {
@@ -177,7 +225,7 @@
           };
 
           for (const nome in meridianos) {
-            if (seletor.value === "TODOS" || seletor.value === nome) {
+            if (document.getElementById('meridiano').value === "TODOS" || document.getElementById('meridiano').value === nome) {
               const dados = meridianos[nome];
               for (let i = 0; i < dados.pontos.length; i++) {
                 const [label, pos] = dados.pontos[i];
@@ -237,7 +285,8 @@
         if (Math.sqrt(dx * dx + dy * dy) < 10) {
           tooltip.style.left = `${e.clientX + 10}px`;
           tooltip.style.top = `${e.clientY + 10}px`;
-          tooltip.innerText = `${p.nome}:\n${funcoes[p.nome] || 'Sem descrição'}`;
+          tooltip.innerText = `${p.nome}:
+${funcoes[p.nome] || 'Sem descrição'}`;
           tooltip.style.display = 'block';
           break;
         }
