@@ -193,38 +193,42 @@
     hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
 
     hands.onResults(results => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.save(); // salva estado atual
-      ctx.scale(-1, 1); // espelha horizontalmente
-      ctx.drawImage(results.image, -canvas.width, 0, canvas.width, canvas.height);
-      ctx.restore(); // restaura para não espelhar os desenhos
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      pontosPlotados = [];
+    // 1. Espelha apenas o vídeo
+    ctx.save();
+    ctx.scale(-1, 1);
+    ctx.drawImage(results.image, -canvas.width, 0, canvas.width, canvas.height);
+    ctx.restore();
 
-      if (results.multiHandLandmarks) {
+    // 2. Desenha os pontos e linhas normalmente (sem espelhar)
+    pontosPlotados = [];
+
+    if (results.multiHandLandmarks) {
         for (const lm of results.multiHandLandmarks) {
-          const meridianos = {
+        const meridianos = {
             'LU': { cor: 'yellow', pontos: [['LU-11', lm[4]], ['LU-10', lm[3]], ['LU-9', deslocar(lm, 0, 9, 30)]] },
             'HT': { cor: 'magenta', pontos: [['HT-9', lm[20]], ['HT-8', lm[19]], ['HT-7', deslocar(lm, 0, 17, 30)]] },
             'PC': { cor: 'blue', pontos: [['PC-9', lm[12]], ['PC-8', lm[9]], ['PC-7', lm[0]]] },
             'IG': { cor: 'green', pontos: [['IG-1', lm[8]], ['IG-2', lm[7]], ['IG-4', {x: (lm[5].x + lm[1].x)/2, y: (lm[5].y + lm[1].y)/2}]] },
             'ID': { cor: 'orange', pontos: [['ID-1', lm[20]], ['ID-3', lm[17]], ['ID-5', deslocar(lm, 0, 17, 30)]] },
             'SJ': { cor: 'purple', pontos: [['SJ-1', lm[16]], ['SJ-2', lm[15]], ['SJ-4', lm[0]]] }
-          };
+        };
 
-          for (const nome in meridianos) {
+        for (const nome in meridianos) {
             if (seletor.value === "TODOS" || seletor.value === nome) {
-              const dados = meridianos[nome];
-              for (let i = 0; i < dados.pontos.length; i++) {
+            const dados = meridianos[nome];
+            for (let i = 0; i < dados.pontos.length; i++) {
                 const [label, pos] = dados.pontos[i];
                 desenharPonto(label, pos, dados.cor);
                 if (i > 0) desenharLinha(dados.pontos[i - 1][1], pos, dados.cor);
-              }
             }
-          }
+            }
         }
-      }
+        }
+    }
     });
+
 
     const camera = new Camera(video, {
       onFrame: async () => {
