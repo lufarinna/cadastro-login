@@ -57,6 +57,21 @@
       background-color: #2f91d1;
     }
 
+    #meridiano-select {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 12px;
+      border-radius: 25px;
+      border: none;
+      font-weight: bold;
+      font-size: 14px;
+      background-color: #ffffffcc;
+      color: #333;
+      cursor: pointer;
+      z-index: 10;
+    }
+
     video#video {
       display: none !important;
     }
@@ -79,12 +94,23 @@
       display: none;
       pointer-events: none;
       z-index: 10;
+      white-space: pre-line;
     }
   </style>
 </head>
 <body>
 
   <div class="painel-container">
+    <select id="meridiano-select">
+      <option value="todos">Ver todos</option>
+      <option value="LU">LU – Pulmão</option>
+      <option value="HT">HT – Coração</option>
+      <option value="PC">PC – Pericárdio</option>
+      <option value="IG">IG – Intestino Grosso</option>
+      <option value="ID">ID – Intestino Delgado</option>
+      <option value="SJ">SJ – Triplo Aquecedor</option>
+    </select>
+
     <h1>🖐️ Detecção de Pontos de Acupuntura</h1>
     <button id="logout-btn" onclick="window.location.href='/logout'">Sair</button>
     <video id="video" autoplay playsinline muted></video>
@@ -118,6 +144,7 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const tooltip = document.getElementById('tooltip');
+    const select = document.getElementById('meridiano-select');
     let pontosPlotados = [];
 
     navigator.mediaDevices.getUserMedia({ video: true })
@@ -137,10 +164,13 @@
 
     const hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
     hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+
     hands.onResults(results => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
       pontosPlotados = [];
+
+      const filtro = select.value;
 
       if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
         for (const lm of results.multiHandLandmarks) {
@@ -154,6 +184,7 @@
           };
 
           for (const nome in meridianos) {
+            if (filtro !== 'todos' && filtro !== nome) continue;
             const dados = meridianos[nome];
             const cor = dados.cor;
             const pontos = dados.pontos;
