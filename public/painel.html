@@ -3,52 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Detecção de Pontos de Acupuntura</title>
+  <title>Área Restrita - Acupuntura</title>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <style>
     * { box-sizing: border-box; }
+
     body {
+      margin: 0;
+      padding: 0;
       font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-
-    header {
+      background-color: #f6cfd0;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      margin-bottom: 10px;
+      height: 100vh;
     }
 
-    h1 {
-      font-size: 1.5em;
-      margin: 0;
+    .painel-container {
+      background: linear-gradient(to right, #0fada3, #473c97);
+      border-radius: 30px;
+      padding: 30px;
+      width: 90%;
+      max-width: 750px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      color: white;
+      position: relative;
+      text-align: center;
+    }
+
+    .painel-container h1 {
+      margin-top: 0;
+      font-size: 24px;
     }
 
     #logout-btn {
-      padding: 8px 14px;
-      background: #e74c3c;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 16px;
+      background-color: #3aa7f5;
       color: white;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 25px;
+      font-size: 14px;
       font-weight: bold;
+      cursor: pointer;
       transition: background 0.3s ease;
     }
 
     #logout-btn:hover {
-      background: #c0392b;
+      background-color: #2f91d1;
+    }
+
+    video#video {
+      display: none !important;
     }
 
     canvas {
       width: 100%;
       height: auto;
-      max-width: 640px;
-      border: 2px solid #ccc;
+      border: 2px solid #fff;
+      border-radius: 12px;
       margin-top: 20px;
     }
 
@@ -63,22 +80,17 @@
       pointer-events: none;
       z-index: 10;
     }
-
-    video#video {
-      display: none !important;
-    }
   </style>
 </head>
 <body>
 
-  <header>
+  <div class="painel-container">
     <h1>🖐️ Detecção de Pontos de Acupuntura</h1>
     <button id="logout-btn" onclick="window.location.href='/logout'">Sair</button>
-  </header>
-
-  <video id="video" autoplay playsinline muted></video>
-  <canvas id="canvas"></canvas>
-  <div id="tooltip"></div>
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    <div id="tooltip"></div>
+  </div>
 
   <script>
     const funcoes = {
