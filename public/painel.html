@@ -1,11 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Painel Restrito</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detecção de Pontos de Acupuntura</title>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 1.5em;
+      margin: 0;
+    }
+
+    #logout-btn {
+      padding: 8px 14px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    #logout-btn:hover {
+      background: #c0392b;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      max-width: 640px;
+      border: 2px solid #ccc;
+      margin-top: 20px;
+    }
+
+    #tooltip {
+      position: absolute;
+      background: #222;
+      color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: none;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    video#video {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-  <h2>Bem-vindo à área restrita!</h2>
-  <a href="/logout">Sair</a>
+
+  <header>
+    <h1>🖐️ Detecção de Pontos de Acupuntura</h1>
+    <button id="logout-btn" onclick="window.location.href='/logout'">Sair</button>
+  </header>
+
+  <video id="video" autoplay playsinline muted></video>
+  <canvas id="canvas"></canvas>
+  <div id="tooltip"></div>
+
+  <script>
+    const funcoes = {
+      'LU-11': 'Reanima consciência, alivia calor e garganta.',
+      'LU-10': 'Melhora tosse seca, garganta inflamada.',
+      'LU-9': 'Tonifica pulmão e circulação.',
+      'HT-9': 'Acalma mente, revigora coração.',
+      'HT-8': 'Reduz ansiedade e palpitações.',
+      'HT-7': 'Melhor ponto para insônia e estresse.',
+      'PC-9': 'Revive consciência, melhora calor no peito.',
+      'PC-8': 'Acalma mente, alivia calor interno.',
+      'PC-7': 'Melhora sono, acalma coração.',
+      'IG-1': 'Dores de dente, febre, garganta inflamada.',
+      'IG-2': 'Remove calor e inflamação.',
+      'IG-4': 'Dores em geral, ativa imunidade.',
+      'ID-1': 'Revive consciência, melhora audição.',
+      'ID-3': 'Dor cervical e torcicolo.',
+      'ID-5': 'Dor de cabeça e pescoço.',
+      'SJ-1': 'Dor no ouvido, garganta seca.',
+      'SJ-2': 'Dores no braço e ombro.',
+      'SJ-4': 'Alivia dor no punho e tensão.'
+    };
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const tooltip = document.getElementById('tooltip');
+    let pontosPlotados = [];
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; });
+
+    function deslocar(landmarks, baseIndex, refIndex, magnitude) {
+      const base = landmarks[baseIndex];
+      const ref = landmarks[refIndex];
+      const dx = ref.x - base.x;
+      const dy = ref.y - base.y;
+      const length = Math.sqrt(dx * dx + dy * dy) || 1;
+      return {
+        x: base.x + (dx / length) * (magnitude / canvas.width),
+        y: base.y + (dy / length) * (magnitude / canvas.height)
+      };
+    }
+
+    const hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
+    hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+    hands.onResults(results => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+      pontosPlotados = [];
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        for (const lm of results.multiHandLandmarks) {
+          const meridianos = {
+            'LU': { cor: 'yellow', pontos: [['LU-11', lm[4]], ['LU-10', lm[3]], ['LU-9', deslocar(lm, 0, 9, 30)]] },
+            'HT': { cor: 'magenta', pontos: [['HT-9', lm[20]], ['HT-8', lm[19]], ['HT-7', deslocar(lm, 0, 17, 30)]] },
+            'PC': { cor: 'blue', pontos: [['PC-9', lm[12]], ['PC-8', lm[9]], ['PC-7', lm[0]]] },
+            'IG': { cor: 'green', pontos: [['IG-1', lm[8]], ['IG-2', lm[7]], ['IG-4', { x: (lm[5].x + lm[1].x)/2, y: (lm[5].y + lm[1].y)/2 }]] },
+            'ID': { cor: 'orange', pontos: [['ID-1', lm[20]], ['ID-3', lm[17]], ['ID-5', deslocar(lm, 0, 17, 30)]] },
+            'SJ': { cor: 'purple', pontos: [['SJ-1', lm[16]], ['SJ-2', lm[15]], ['SJ-4', lm[0]]] }
+          };
+
+          for (const nome in meridianos) {
+            const dados = meridianos[nome];
+            const cor = dados.cor;
+            const pontos = dados.pontos;
+
+            for (let i = 0; i < pontos.length; i++) {
+              const [label, pos] = pontos[i];
+              desenharPonto(label, pos, cor);
+              if (i > 0) desenharLinha(pontos[i - 1][1], pos, cor);
+            }
+          }
+        }
+      }
+    });
+
+    const camera = new Camera(video, {
+      onFrame: async () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        await hands.send({ image: video });
+      },
+      width: 640,
+      height: 480
+    });
+    camera.start();
+
+    function desenharPonto(nome, ponto, cor) {
+      const x = ponto.x * canvas.width;
+      const y = ponto.y * canvas.height;
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = cor;
+      ctx.fill();
+      ctx.font = '12px Arial';
+      ctx.fillText(nome, x + 8, y);
+      pontosPlotados.push({ nome, x, y });
+    }
+
+    function desenharLinha(p1, p2, cor) {
+      ctx.beginPath();
+      ctx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
+      ctx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
+      ctx.strokeStyle = cor;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    canvas.addEventListener('mousemove', e => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      tooltip.style.display = 'none';
+
+      for (const p of pontosPlotados) {
+        const dx = mx - p.x;
+        const dy = my - p.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 10) {
+          tooltip.style.left = `${e.clientX + 10}px`;
+          tooltip.style.top = `${e.clientY + 10}px`;
+          tooltip.innerText = `${p.nome}:\n${funcoes[p.nome] || 'Sem descrição'}`;
+          tooltip.style.display = 'block';
+          break;
+        }
+      }
+    });
+  </script>
 </body>
 </html>
