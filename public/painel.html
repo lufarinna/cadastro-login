@@ -8,127 +8,91 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <style>
-  * { box-sizing: border-box; }
-
-  body {
-    font-family: Arial, sans-serif;
-    background: #f6cfd0;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
-
-  .painel {
-    background: linear-gradient(to right, #0fada3, #473c97);
-    border-radius: 30px;
-    padding: 20px;
-    margin: 40px auto;
-    width: 90%;
-    max-width: 700px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    position: relative;
-  }
-
-  .painel h1 {
-    color: white;
-    font-size: 1.6em;
-    margin: 0 0 20px;
-  }
-
-  #video {
-    display: none;
-  }
-
-  canvas {
-    width: 100%;
-    height: auto;
-    border-radius: 15px;
-    border: 2px solid #ddd;
-  }
-
-  #tooltip {
-    position: absolute;
-    background: #222;
-    color: white;
-    padding: 6px 8px;
-    border-radius: 4px;
-    font-size: 14px;
-    display: none;
-    pointer-events: none;
-    z-index: 10;
-  }
-
-  #meridiano {
-    margin-top: 15px;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 25px;
-    border: none;
-    background: white;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-    width: 90%;
-    max-width: 300px;
-  }
-
-  #sair {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: #3aa7f5;
-    color: white;
-    font-weight: bold;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    cursor: pointer;
-  }
-
-  #sair:hover {
-    background: #2f91d1;
-  }
-
-  /* RESPONSIVO */
-  @media (max-width: 600px) {
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6cfd0;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
     .painel {
-      padding: 20px 10px;
-      margin: 20px auto;
-      border-radius: 20px;
+      background: linear-gradient(to right, #0fada3, #473c97);
+      border-radius: 30px;
+      padding: 20px;
+      margin: 40px auto;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      position: relative;
     }
-
     .painel h1 {
-      font-size: 1.2em;
-      margin-bottom: 15px;
+      color: white;
+      font-size: 1.6em;
+      margin: 0 0 20px;
     }
-
-    #sair {
-      top: 10px;
-      right: 10px;
-      padding: 6px 12px;
-      font-size: 14px;
-    }
-
-    #meridiano {
-      font-size: 14px;
-      padding: 8px;
-    }
-  }
-
-  @media (max-width: 400px) {
-    #meridiano {
+    #video { display: none; }
+    canvas {
       width: 100%;
+      height: auto;
+      border-radius: 15px;
+      border: 2px solid #ddd;
     }
-
-    .painel h1 {
-      font-size: 1.1em;
+    #tooltip {
+      position: absolute;
+      background: #222;
+      color: white;
+      padding: 6px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: none;
+      pointer-events: none;
+      z-index: 10;
     }
-  }
-</style>
-
+    #meridiano {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 25px;
+      border: none;
+      background: white;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 300px;
+    }
+    #descricao-meridiano {
+      background: #ffffff;
+      margin: 20px auto 0;
+      padding: 15px;
+      text-align: left;
+      width: 90%;
+      max-width: 700px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.15);
+      font-size: 15px;
+      line-height: 1.5em;
+    }
+    #sair {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: #3aa7f5;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    #sair:hover {
+      background: #2f91d1;
+    }
+  </style>
 </head>
 <body>
   <div class="painel">
     <button id="sair" onclick="window.location.href='index.html'">Sair</button>
-    <h1>🖐️ Detecção de Pontos de Acupuntura</h1>
+    <h1>🖐️ Deteção de Pontos de Acupuntura</h1>
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
     <select id="meridiano">
@@ -142,149 +106,84 @@
     </select>
   </div>
 
+  <div id="descricao-meridiano">
+    <strong>Descrição:</strong> Selecione um meridiano para ver os detalhes.
+  </div>
+
   <div id="tooltip"></div>
 
   <script>
-    const funcoes = {
-      'LU-11': 'Reanima consciência, alivia calor e garganta.',
-      'LU-10': 'Melhora tosse seca, garganta inflamada.',
-      'LU-9': 'Tonifica pulmão e circulação.',
-      'HT-9': 'Acalma mente, revigora coração.',
-      'HT-8': 'Reduz ansiedade e palpitações.',
-      'HT-7': 'Melhor ponto para insônia e estresse.',
-      'PC-9': 'Revive consciência, melhora calor no peito.',
-      'PC-8': 'Acalma mente, alivia calor interno.',
-      'PC-7': 'Melhora sono, acalma coração.',
-      'IG-1': 'Dores de dente, febre, garganta inflamada.',
-      'IG-2': 'Remove calor e inflamação.',
-      'IG-4': 'Dores em geral, ativa imunidade.',
-      'ID-1': 'Revive consciência, melhora audição.',
-      'ID-3': 'Dor cervical e torcicolo.',
-      'ID-5': 'Dor de cabeça e pescoço.',
-      'SJ-1': 'Dor no ouvido, garganta seca.',
-      'SJ-2': 'Dores no braço e ombro.',
-      'SJ-4': 'Alivia dor no punho e tensão.'
-    };
-
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const tooltip = document.getElementById('tooltip');
-    const seletor = document.getElementById('meridiano');
-    let pontosPlotados = [];
-
-    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-      video.srcObject = stream;
-    });
-
-    function deslocar(landmarks, baseIndex, refIndex, magnitude) {
-      const base = landmarks[baseIndex];
-      const ref = landmarks[refIndex];
-      const dx = ref.x - base.x;
-      const dy = ref.y - base.y;
-      const length = Math.sqrt(dx * dx + dy * dy) || 1;
-      return {
-        x: base.x + (dx / length) * (magnitude / canvas.width),
-        y: base.y + (dy / length) * (magnitude / canvas.height)
-      };
-    }
-
-    const hands = new Hands({ locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
-    hands.setOptions({ maxNumHands: 2, modelComplexity: 0, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-
-    hands.onResults(results => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 1. Espelha apenas o vídeo
-    ctx.save();
-    ctx.scale(-1, 1);
-    ctx.drawImage(results.image, -canvas.width, 0, canvas.width, canvas.height);
-    ctx.restore();
-
-    // 2. Desenha os pontos e linhas normalmente (sem espelhar)
-    pontosPlotados = [];
-
-    if (results.multiHandLandmarks) {
-        for (const lm of results.multiHandLandmarks) {
-        const meridianos = {
-            'LU': { cor: 'yellow', pontos: [['LU-11', lm[4]], ['LU-10', lm[3]], ['LU-9', deslocar(lm, 0, 9, 30)]] },
-            'HT': { cor: 'magenta', pontos: [['HT-9', lm[20]], ['HT-8', lm[19]], ['HT-7', deslocar(lm, 0, 17, 30)]] },
-            'PC': { cor: 'blue', pontos: [['PC-9', lm[12]], ['PC-8', lm[9]], ['PC-7', lm[0]]] },
-            'IG': { cor: 'green', pontos: [['IG-1', lm[8]], ['IG-2', lm[7]], ['IG-4', {x: (lm[5].x + lm[1].x)/2, y: (lm[5].y + lm[1].y)/2}]] },
-            'ID': { cor: 'orange', pontos: [['ID-1', lm[20]], ['ID-3', lm[17]], ['ID-5', deslocar(lm, 0, 17, 30)]] },
-            'SJ': { cor: 'purple', pontos: [['SJ-1', lm[16]], ['SJ-2', lm[15]], ['SJ-4', lm[0]]] }
-        };
-
-        for (const nome in meridianos) {
-            if (seletor.value === "TODOS" || seletor.value === nome) {
-            const dados = meridianos[nome];
-            for (let i = 0; i < dados.pontos.length; i++) {
-                const [label, pos] = dados.pontos[i];
-                desenharPonto(label, pos, dados.cor);
-                if (i > 0) desenharLinha(dados.pontos[i - 1][1], pos, dados.cor);
-            }
-            }
+    const descricoesMeridianos = {
+      LU: {
+        nome: "Meridiano do Pulmão",
+        descricao: "Relacionado à respiração e imunidade.",
+        pontos: {
+          'LU-11': 'Reanima consciência, alivia calor e garganta.',
+          'LU-10': 'Melhora tosse seca, garganta inflamada.',
+          'LU-9': 'Tonifica pulmão e circulação.'
         }
-        }
-    }
-    });
-
-
-    const camera = new Camera(video, {
-      onFrame: async () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        await hands.send({ image: video });
       },
-      width: 640,
-      height: 480
-    });
-    camera.start();
-
-    function desenharPonto(nome, ponto, cor) {
-    const x = canvas.width - (ponto.x * canvas.width); // espelha horizontalmente
-    const y = ponto.y * canvas.height;
-    ctx.beginPath();
-    ctx.arc(x, y, 6, 0, 2 * Math.PI);
-    ctx.fillStyle = cor;
-    ctx.fill();
-    ctx.font = '12px Arial';
-    ctx.fillText(nome, x + 8, y);
-    pontosPlotados.push({ nome, x, y });
-    }
-
-
-    function desenharLinha(p1, p2, cor) {
-    const x1 = canvas.width - (p1.x * canvas.width);
-    const y1 = p1.y * canvas.height;
-    const x2 = canvas.width - (p2.x * canvas.width);
-    const y2 = p2.y * canvas.height;
-
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.strokeStyle = cor;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    }
-
-    canvas.addEventListener('mousemove', e => {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      tooltip.style.display = 'none';
-
-      for (const p of pontosPlotados) {
-        const dx = mx - p.x;
-        const dy = my - p.y;
-        if (Math.sqrt(dx * dx + dy * dy) < 10) {
-          tooltip.style.left = `${e.clientX + 10}px`;
-          tooltip.style.top = `${e.clientY + 10}px`;
-          tooltip.innerText = `${p.nome}:\n${funcoes[p.nome] || 'Sem descrição'}`;
-          tooltip.style.display = 'block';
-          break;
+      HT: {
+        nome: "Meridiano do Coração",
+        descricao: "Regula o sistema cardiovascular e emoções.",
+        pontos: {
+          'HT-9': 'Acalma mente, revigora coração.',
+          'HT-8': 'Reduz ansiedade e palpitações.',
+          'HT-7': 'Melhor ponto para insônia e estresse.'
+        }
+      },
+      PC: {
+        nome: "Meridiano do Pericárdio",
+        descricao: "Protege o coração, alivia ansiedade e regula o sangue.",
+        pontos: {
+          'PC-9': 'Revive consciência, melhora calor no peito.',
+          'PC-8': 'Acalma mente, alivia calor interno.',
+          'PC-7': 'Melhora sono, acalma coração.'
+        }
+      },
+      IG: {
+        nome: "Meridiano do Intestino Grosso",
+        descricao: "Atua na eliminação e defesa do corpo.",
+        pontos: {
+          'IG-1': 'Dores de dente, febre, garganta inflamada.',
+          'IG-2': 'Remove calor e inflamação.',
+          'IG-4': 'Dores em geral, ativa imunidade.'
+        }
+      },
+      ID: {
+        nome: "Meridiano do Intestino Delgado",
+        descricao: "Controla a absorção e separação de líquidos.",
+        pontos: {
+          'ID-1': 'Revive consciência, melhora audição.',
+          'ID-3': 'Dor cervical e torcicolo.',
+          'ID-5': 'Dor de cabeça e pescoço.'
+        }
+      },
+      SJ: {
+        nome: "Meridiano do Triplo Aquecedor",
+        descricao: "Regula funções metabólicas e distribuição de energia.",
+        pontos: {
+          'SJ-1': 'Dor no ouvido, garganta seca.',
+          'SJ-2': 'Dores no braço e ombro.',
+          'SJ-4': 'Alivia dor no punho e tensão.'
         }
       }
+    };
+
+    document.getElementById('meridiano').addEventListener('change', function() {
+      const valor = this.value;
+      const descDiv = document.getElementById('descricao-meridiano');
+      if (valor === "TODOS" || !descricoesMeridianos[valor]) {
+        descDiv.innerHTML = '<strong>Descrição:</strong> Selecione um meridiano para ver os detalhes.';
+        return;
+      }
+      const info = descricoesMeridianos[valor];
+      let html = `<strong>${info.nome}</strong><p>${info.descricao}</p><ul>`;
+      for (const ponto in info.pontos) {
+        html += `<li><strong>${ponto}</strong>: ${info.pontos[ponto]}</li>`;
+      }
+      html += '</ul>';
+      descDiv.innerHTML = html;
     });
   </script>
 </body>
