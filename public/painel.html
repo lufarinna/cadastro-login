@@ -31,7 +31,13 @@
       font-size: 1.6em;
       margin: 0 0 20px;
     }
-    #video { display: none; }
+    #video {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
     canvas {
       width: 100%;
       height: auto;
