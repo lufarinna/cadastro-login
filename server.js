@@ -1,21 +1,30 @@
-// server.js completo com senha criptografada
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const session = require('express-session');
+
 const app = express();
 
-// Middleware para servir arquivos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public'))); 
+// Middleware para arquivos estáticos
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Conexão com MongoDB Atlas
-mongoose.connect(process.env.MONGO_URI + 'usuarios')
-  .then(() => console.log('Conectado ao MongoDB Atlas'))
-  .catch(err => console.error('Erro ao conectar ao MongoDB:', err));
+// Configurar sessão
+app.use(session({
+  secret: 'segredo-super-seguro', // troque por algo mais forte em produção
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // true só com HTTPS
+}));
 
-// Modelo de usuário
+// MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Conectado ao MongoDB'))
+  .catch(err => console.error('Erro na conexão', err));
+
+// Modelo do usuário
 const Usuario = mongoose.model('Usuario', {
   nome: String,
   email: String,
@@ -23,56 +32,53 @@ const Usuario = mongoose.model('Usuario', {
   senha: String
 });
 
-// Rota de cadastro com bcrypt
+// Middleware de proteção
+function proteger(req, res, next) {
+  if (req.session.usuarioLogado) {
+    next();
+  } else {
+    res.redirect('/');
+  }
+}
+
+// Cadastro
 app.post('/cadastro', async (req, res) => {
-  try {
-    const { nome, email, username, senha } = req.body;
+  const { nome, email, username, senha } = req.body;
 
-    const usuarioExistente = await Usuario.findOne({
-      $or: [{ email }, { username }]
-    });
+  const existente = await Usuario.findOne({ $or: [{ email }, { username }] });
+  if (existente) return res.status(400).json({ message: 'Usuário já existe' });
 
-    if (usuarioExistente) {
-      return res.status(400).json({ message: 'Usuário ou e-mail já cadastrado.' });
-    }
+  const senhaHash = await bcrypt.hash(senha, 10);
+  await new Usuario({ nome, email, username, senha: senhaHash }).save();
 
-    const senhaHash = await bcrypt.hash(senha, 10);
-    const novo = new Usuario({ nome, email, username, senha: senhaHash });
-    await novo.save();
-
-    res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
-  } catch (err) {
-    console.error('Erro ao cadastrar:', err);
-    res.status(500).json({ message: 'Erro ao cadastrar usuário' });
-  }
+  res.status(201).json({ message: 'Cadastro feito com sucesso' });
 });
 
+// Login
 app.post('/login', async (req, res) => {
-  try {
-    const { username, senha } = req.body;
-    console.log("Dados recebidos:", req.body);
+  const { username, senha } = req.body;
+  const user = await Usuario.findOne({ username });
 
-    const user = await Usuario.findOne({ username });
-    console.log("Usuário encontrado:", user);
+  if (!user) return res.status(401).json({ message: 'Login inválido' });
 
-    if (!user) {
-      return res.status(401).json({ message: 'Usuário ou senha inválidos' });
-    }
+  const match = await bcrypt.compare(senha, user.senha);
+  if (!match) return res.status(401).json({ message: 'Login inválido' });
 
-    const senhaCorreta = await bcrypt.compare(senha, user.senha);
-    console.log("Senha correta?", senhaCorreta);
-
-    if (!senhaCorreta) {
-      return res.status(401).json({ message: 'Usuário ou senha inválidos' });
-    }
-
-    return res.status(200).json({ message: 'Login bem-sucedido' });
-  } catch (err) {
-    console.error('Erro no login:', err);
-    res.status(500).json({ message: 'Erro interno do servidor' });
-  }
+  req.session.usuarioLogado = true;
+  res.status(200).json({ message: 'Login ok' });
 });
 
-// Inicializa o servidor
+// Logout
+app.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/');
+});
+
+// Página protegida
+app.get('/painel', proteger, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'painel.html'));
+});
+
+// Iniciar
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, () => console.log(`Rodando em http://localhost:${PORT}`));
