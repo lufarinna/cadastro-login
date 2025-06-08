@@ -2,86 +2,47 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Área Restrita - Acupuntura</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detecção de Pontos de Acupuntura</title>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <style>
     * { box-sizing: border-box; }
-
     body {
+      font-family: Arial, sans-serif;
+      background: #f6cfd0;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f6cfd0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .painel-container {
-      background: linear-gradient(to right, #0fada3, #473c97);
-      border-radius: 30px;
-      padding: 30px;
-      width: 90%;
-      max-width: 750px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-      color: white;
-      position: relative;
       text-align: center;
     }
 
-    .painel-container h1 {
-      margin-top: 0;
-      font-size: 24px;
+    .painel {
+      background: linear-gradient(to right, #0fada3, #473c97);
+      border-radius: 30px;
+      padding: 20px;
+      margin: 40px auto;
+      width: 90%;
+      max-width: 700px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      position: relative;
     }
 
-    #logout-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 10px 16px;
-      background-color: #3aa7f5;
+    .painel h1 {
       color: white;
-      border: none;
-      border-radius: 25px;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
+      font-size: 1.6em;
+      margin-top: 10px;
     }
 
-    #logout-btn:hover {
-      background-color: #2f91d1;
-    }
-
-    #meridiano-select {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      padding: 8px 12px;
-      border-radius: 25px;
-      border: none;
-      font-weight: bold;
-      font-size: 14px;
-      background-color: #ffffffcc;
-      color: #333;
-      cursor: pointer;
-      z-index: 10;
-    }
-
-    video#video {
-      display: none !important;
+    #video {
+      display: none;
     }
 
     canvas {
       width: 100%;
       height: auto;
-      border: 2px solid #fff;
-      border-radius: 12px;
-      margin-top: 20px;
+      border-radius: 15px;
+      border: 2px solid #ddd;
     }
 
     #tooltip {
@@ -94,15 +55,44 @@
       display: none;
       pointer-events: none;
       z-index: 10;
-      white-space: pre-line;
+    }
+
+    #meridiano {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 25px;
+      border: none;
+      background: white;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    #sair {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: #3aa7f5;
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    #sair:hover {
+      background: #2f91d1;
     }
   </style>
 </head>
 <body>
-
-  <div class="painel-container">
-    <select id="meridiano-select">
-      <option value="todos">Ver todos</option>
+  <div class="painel">
+    <button id="sair" onclick="window.location.href='index.html'">Sair</button>
+    <h1>🖐️ Detecção de Pontos de Acupuntura</h1>
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    <select id="meridiano">
+      <option value="TODOS">👁️ Mostrar todos os meridianos</option>
       <option value="LU">LU – Pulmão</option>
       <option value="HT">HT – Coração</option>
       <option value="PC">PC – Pericárdio</option>
@@ -110,13 +100,9 @@
       <option value="ID">ID – Intestino Delgado</option>
       <option value="SJ">SJ – Triplo Aquecedor</option>
     </select>
-
-    <h1>🖐️ Detecção de Pontos de Acupuntura</h1>
-    <button id="logout-btn" onclick="window.location.href='/logout'">Sair</button>
-    <video id="video" autoplay playsinline muted></video>
-    <canvas id="canvas"></canvas>
-    <div id="tooltip"></div>
   </div>
+
+  <div id="tooltip"></div>
 
   <script>
     const funcoes = {
@@ -144,11 +130,12 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const tooltip = document.getElementById('tooltip');
-    const select = document.getElementById('meridiano-select');
+    const seletor = document.getElementById('meridiano');
     let pontosPlotados = [];
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { video.srcObject = stream; });
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      video.srcObject = stream;
+    });
 
     function deslocar(landmarks, baseIndex, refIndex, magnitude) {
       const base = landmarks[baseIndex];
@@ -170,29 +157,25 @@
       ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
       pontosPlotados = [];
 
-      const filtro = select.value;
-
-      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      if (results.multiHandLandmarks) {
         for (const lm of results.multiHandLandmarks) {
           const meridianos = {
             'LU': { cor: 'yellow', pontos: [['LU-11', lm[4]], ['LU-10', lm[3]], ['LU-9', deslocar(lm, 0, 9, 30)]] },
             'HT': { cor: 'magenta', pontos: [['HT-9', lm[20]], ['HT-8', lm[19]], ['HT-7', deslocar(lm, 0, 17, 30)]] },
             'PC': { cor: 'blue', pontos: [['PC-9', lm[12]], ['PC-8', lm[9]], ['PC-7', lm[0]]] },
-            'IG': { cor: 'green', pontos: [['IG-1', lm[8]], ['IG-2', lm[7]], ['IG-4', { x: (lm[5].x + lm[1].x)/2, y: (lm[5].y + lm[1].y)/2 }]] },
+            'IG': { cor: 'green', pontos: [['IG-1', lm[8]], ['IG-2', lm[7]], ['IG-4', {x: (lm[5].x + lm[1].x)/2, y: (lm[5].y + lm[1].y)/2}]] },
             'ID': { cor: 'orange', pontos: [['ID-1', lm[20]], ['ID-3', lm[17]], ['ID-5', deslocar(lm, 0, 17, 30)]] },
             'SJ': { cor: 'purple', pontos: [['SJ-1', lm[16]], ['SJ-2', lm[15]], ['SJ-4', lm[0]]] }
           };
 
           for (const nome in meridianos) {
-            if (filtro !== 'todos' && filtro !== nome) continue;
-            const dados = meridianos[nome];
-            const cor = dados.cor;
-            const pontos = dados.pontos;
-
-            for (let i = 0; i < pontos.length; i++) {
-              const [label, pos] = pontos[i];
-              desenharPonto(label, pos, cor);
-              if (i > 0) desenharLinha(pontos[i - 1][1], pos, cor);
+            if (seletor.value === "TODOS" || seletor.value === nome) {
+              const dados = meridianos[nome];
+              for (let i = 0; i < dados.pontos.length; i++) {
+                const [label, pos] = dados.pontos[i];
+                desenharPonto(label, pos, dados.cor);
+                if (i > 0) desenharLinha(dados.pontos[i - 1][1], pos, dados.cor);
+              }
             }
           }
         }
