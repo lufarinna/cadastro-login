@@ -1,29 +1,121 @@
-<!-- cadastro.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cadastro</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f6cfd0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: linear-gradient(to right, #0fada3, #473c97);
+      border-radius: 30px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .login-container h2 {
+      color: #ffffff;
+      margin-bottom: 30px;
+      font-size: 1.8em;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 25px;
+      background-color: #d6d6d6;
+      font-size: 16px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 14px;
+      background-color: #3aa7f5;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .login-container button:hover {
+      background-color: #2f91d1;
+    }
+
+    .login-container a {
+      color: white;
+      text-decoration: underline;
+      font-size: 0.9em;
+    }
+
+    #cadastro-erro {
+      color: yellow;
+      font-size: 0.85em;
+      margin-top: 10px;
+    }
+
+    #cadastro-ok {
+      color: #00ffae;
+      font-size: 0.85em;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 400px) {
+      .login-container {
+        padding: 30px 20px;
+      }
+
+      .login-container h2 {
+        font-size: 1.5em;
+      }
+
+      .login-container input,
+      .login-container button {
+        font-size: 15px;
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
     <h2>Cadastro</h2>
     <form id="cadastro-form">
-      <input type="text" id="nome" placeholder="Nome completo" required>
-      <input type="email" id="email" placeholder="E-mail" required>
-      <input type="text" id="username" placeholder="Nome de usuário" required>
-      <input type="password" id="senha" placeholder="Senha" required>
-      <input type="password" id="confirmar" placeholder="Confirmar senha" required>
+      <input type="text" id="nome" placeholder="Nome completo" required />
+      <input type="email" id="email" placeholder="E-mail" required />
+      <input type="text" id="username" placeholder="Nome de usuário" required />
+      <input type="password" id="senha" placeholder="Senha" required />
+      <input type="password" id="confirmar" placeholder="Confirmar senha" required />
       <button type="submit">Cadastrar</button>
     </form>
     <div style="margin-top: 15px;">
-      <a href="index.html" style="color: white; text-decoration: underline;">Voltar ao login</a>
+      <a href="index.html">Voltar ao login</a>
     </div>
-    <p id="cadastro-erro" style="color: yellow; font-size: 14px;"></p>
-    <p id="cadastro-ok" style="color: #00ffae; font-size: 14px;"></p>
+    <p id="cadastro-erro"></p>
+    <p id="cadastro-ok"></p>
   </div>
+
   <script>
     const form = document.getElementById('cadastro-form');
     const erro = document.getElementById('cadastro-erro');

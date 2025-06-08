@@ -8,82 +8,122 @@
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #f6cfd0;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
+  * { box-sizing: border-box; }
 
+  body {
+    font-family: Arial, sans-serif;
+    background: #f6cfd0;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  .painel {
+    background: linear-gradient(to right, #0fada3, #473c97);
+    border-radius: 30px;
+    padding: 20px;
+    margin: 40px auto;
+    width: 90%;
+    max-width: 700px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .painel h1 {
+    color: white;
+    font-size: 1.6em;
+    margin: 0 0 20px;
+  }
+
+  #video {
+    display: none;
+  }
+
+  canvas {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    border: 2px solid #ddd;
+  }
+
+  #tooltip {
+    position: absolute;
+    background: #222;
+    color: white;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: none;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  #meridiano {
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 25px;
+    border: none;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 300px;
+  }
+
+  #sair {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: #3aa7f5;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  #sair:hover {
+    background: #2f91d1;
+  }
+
+  /* RESPONSIVO */
+  @media (max-width: 600px) {
     .painel {
-      background: linear-gradient(to right, #0fada3, #473c97);
-      border-radius: 30px;
-      padding: 20px;
-      margin: 40px auto;
-      width: 90%;
-      max-width: 700px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-      position: relative;
+      padding: 20px 10px;
+      margin: 20px auto;
+      border-radius: 20px;
     }
 
     .painel h1 {
-      color: white;
-      font-size: 1.6em;
-      margin-top: 10px;
-    }
-
-    #video {
-      display: none;
-    }
-
-    canvas {
-      width: 100%;
-      height: auto;
-      border-radius: 15px;
-      border: 2px solid #ddd;
-    }
-
-    #tooltip {
-      position: absolute;
-      background: #222;
-      color: white;
-      padding: 6px 8px;
-      border-radius: 4px;
-      font-size: 14px;
-      display: none;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    #meridiano {
-      margin-top: 20px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 25px;
-      border: none;
-      background: white;
-      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      font-size: 1.2em;
+      margin-bottom: 15px;
     }
 
     #sair {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      background: #3aa7f5;
-      color: white;
-      font-weight: bold;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
+      top: 10px;
+      right: 10px;
+      padding: 6px 12px;
+      font-size: 14px;
     }
 
-    #sair:hover {
-      background: #2f91d1;
+    #meridiano {
+      font-size: 14px;
+      padding: 8px;
     }
-  </style>
+  }
+
+  @media (max-width: 400px) {
+    #meridiano {
+      width: 100%;
+    }
+
+    .painel h1 {
+      font-size: 1.1em;
+    }
+  }
+</style>
+
 </head>
 <body>
   <div class="painel">

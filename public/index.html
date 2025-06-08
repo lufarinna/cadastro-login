@@ -1,50 +1,133 @@
-<!-- index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f6cfd0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: linear-gradient(to right, #0fada3, #473c97);
+      border-radius: 30px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .login-container h2 {
+      color: #ffffff;
+      margin-bottom: 30px;
+      font-size: 1.8em;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 25px;
+      background-color: #d6d6d6;
+      font-size: 16px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 14px;
+      background-color: #3aa7f5;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .login-container button:hover {
+      background-color: #2f91d1;
+    }
+
+    .login-container a {
+      color: white;
+      text-decoration: underline;
+      font-size: 0.9em;
+    }
+
+    #login-erro {
+      color: yellow;
+      font-size: 0.85em;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 400px) {
+      .login-container {
+        padding: 30px 20px;
+      }
+
+      .login-container h2 {
+        font-size: 1.5em;
+      }
+
+      .login-container input,
+      .login-container button {
+        font-size: 15px;
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
     <h2>Login</h2>
     <form id="login-form">
-      <input type="text" id="username" placeholder="Username" required>
-      <input type="password" id="senha" placeholder="Password" required>
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="senha" placeholder="Password" required />
       <button type="submit">Login</button>
     </form>
     <div style="margin-top: 15px;">
-      <a href="cadastro.html" style="color: white; text-decoration: underline;">Não tem conta? Cadastre-se</a>
+      <a href="cadastro.html">Não tem conta? Cadastre-se</a>
     </div>
-    <p id="login-erro" style="color: yellow; font-size: 14px;"></p>
+    <p id="login-erro"></p>
   </div>
 
-<script>
-  const form = document.getElementById('login-form');
-  const erro = document.getElementById('login-erro');
+  <script>
+    const form = document.getElementById("login-form");
+    const erro = document.getElementById("login-erro");
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const senha = document.getElementById('senha').value;
+      const username = document.getElementById("username").value;
+      const senha = document.getElementById("senha").value;
 
-    const response = await fetch('/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, senha })
+      const response = await fetch("/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, senha }),
+      });
+
+      if (response.ok) {
+        window.location.href = "/painel";
+      } else {
+        erro.textContent = "Usuário ou senha incorretos";
+      }
     });
-
-    if (response.ok) {
-      window.location.href = '/painel';
-    } else {
-      erro.textContent = 'Usuário ou senha incorretos';
-    }
-
-  });
-</script>
-
+  </script>
 </body>
 </html>
